@@ -64,7 +64,7 @@ class Openface:
     # tar形式に変換
     os.chdir(os.path.dirname(src))
     srcname = os.path.basename(src)
-    print("src " + srcname)
+
     with tarfile.open("copy.tar", 'w') as tar:
       try:
         tar.add(srcname)
