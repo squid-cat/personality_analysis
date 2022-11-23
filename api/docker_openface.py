@@ -1,5 +1,7 @@
 # dockerに関する操作を定義するもの
 import docker
+import os
+import tarfile
 
 # 型定義
 # Image: https://docker-py.readthedocs.io/en/stable/images.html#image-objects
@@ -53,6 +55,29 @@ class Openface:
     """
     self.container_openface.stop()
     self.container_openface.remove()
+    return
+
+  def copyToDocker(self, src: str) -> None:
+    """
+    localからコンテナへファイルをコピーする
+    """
+    # tar形式に変換
+    os.chdir(os.path.dirname(src))
+    srcname = os.path.basename(src)
+    print("src " + srcname)
+    with tarfile.open("copy.tar", 'w') as tar:
+      try:
+        tar.add(srcname)
+      finally:
+        tar.close()
+
+    with open('copy.tar', 'rb') as fd:
+      ok = self.container_openface.put_archive(path="/home/openface-build", data=fd)
+      if not ok:
+        raise Exception('ファイルコピーに失敗しました ({} -> {}:/home/openface-build)'.format(src, self.container_openface.short_id))
+      else:
+        print("{} -> {}:/home/openface-build にコピーしました".format(src, self.container_openface.short_id))
+    
     return
 
 

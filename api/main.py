@@ -1,4 +1,5 @@
 import sys
+import time
 
 # 独自ライブラリのimport
 import docker_openface
@@ -8,9 +9,10 @@ def main():
     # openfaceのインストラクタ作成
     openface = docker_openface.Openface()
     openface.start()
+    openface.copyToDocker("./api/data/input.mp4")
     
-    while True:
-      pass
+    # TEST: 5秒停止
+    time.sleep(5)
   
   finally:
     # 処理終了時に必ず実行
