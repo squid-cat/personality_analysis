@@ -1,6 +1,11 @@
 # dockerに関する操作を定義するもの
-import docker 
-from docker.models.images import Image # 型定義 Image: https://docker-py.readthedocs.io/en/stable/images.html#image-objects
+import docker
+
+# 型定義
+# Image: https://docker-py.readthedocs.io/en/stable/images.html#image-objects
+# Model: 
+from docker.models.images import Image
+from docker.models.containers import Container
 
 class Openface:
 
@@ -13,7 +18,7 @@ class Openface:
     """
 
     # 定数の定義
-    self.image_name = "algebr/openface:latest" # openfaceのコンテナ名（最新バージョンを指定） https://hub.docker.com/r/algebr/openface/
+    self.image_name = "algebr/openface:latest" # openfaceのimage名（最新バージョンを指定） https://hub.docker.com/r/algebr/openface/
 
     # dockerのclient情報を取得
     try:
@@ -24,14 +29,39 @@ class Openface:
       print(message_init_error)
       raise error
 
-    # openfaceのコンテナを起動
     # ターゲットのimageがあるか確認
-    if not self.isHaveContainer(self.image_name):
+    if not self.isHaveImage(self.image_name):
       # 無い場合はコンテナを走らせてimageを作成
-      print("imageの新規作成中... (target: {})".format(self.image_name))
-      self.client.containers.run(image=self.image_name, remove=True)
-      print("imageの作成終了 (target: {})".format(self.image_name))
-    
+      self.createImage(self.image_name)
+      
+    return
+
+  def start(self) -> None:
+    """
+    openfaceを起動する
+    - コンテナを作成し起動する
+    """
+    self.container_openface = self.createContainer()
+    self.container_openface.start()
+    return 
+
+
+  def stop(self) -> None:
+    """
+    openfaceを停止する
+    - コンテナを停止して削除する
+    """
+    self.container_openface.stop()
+    self.container_openface.remove()
+    return
+
+
+  def createContainer(self) -> Container:
+    """
+    コンテナを作成する
+    """
+    return self.client.containers.create(self.image_name, detach=True, tty=True)
+
 
   def getImageList(self) -> list[Image]:
     """
@@ -40,12 +70,22 @@ class Openface:
     return self.client.images.list()
 
 
-  def isHaveContainer(self, container_name: str) -> bool:
+  def isHaveImage(self, image_name: str) -> bool:
     """
-    対象のコンテナが含まれているか確認
-    container_name: 対象のコンテナ名
+    対象のimageが含まれているか確認
+    image_name: 対象のコンテナ名
     """
     for image in self.getImageList():
-      if container_name in image.tags:
+      if image_name in image.tags:
         return True
     return False
+
+
+  def createImage(self, image_name: str) -> None:
+    """
+    imageを取得・作成
+    """
+    print("imageの新規作成中... (target: {})".format(image_name))
+    self.client.containers.run(image=image_name, remove=True)
+    print("imageの作成終了 (target: {})".format(image_name))
+    return
