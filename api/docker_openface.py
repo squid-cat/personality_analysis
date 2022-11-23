@@ -37,7 +37,6 @@ class Openface:
     """
     docker imagesの一覧を取得
     """
-    a = self.client.images.list()
     return self.client.images.list()
 
 
