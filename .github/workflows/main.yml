@@ -3,18 +3,20 @@ name: Yarn CI
 on: [push]
 
 jobs:
-  lint:
+  check-lint:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          check-latest: true
 
       - name: yarn install
-        uses: nuxt/actions-yarn@node-11
-        with:
-          args: "install"
+        run: yarn
 
       - name: yarn lint
-        uses: nuxt/actions-yarn@node-11
-        with:
-          args: "lint"
+        run: yarn lint
