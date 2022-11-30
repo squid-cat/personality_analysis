@@ -3,20 +3,24 @@ import atexit
 
 # api周辺のライブラリ
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 # 独自ライブラリのimport
 import docker_openface
 
 app = Flask(__name__)
+CORS(app)
 currentPath = os.getcwd()
 
 # openfaceのインストラクタ作成
 openface = docker_openface.Openface()
 openface.start()
 
-@app.route("/test", methods=["GET"])
+# [GET] 接続テスト
+@app.route("/connect", methods=["GET"])
 def getTest():
-  return jsonify({"message": "hello world!"}), 200
+  return jsonify({"message": "ok",
+                  "data": {"connect": True}}), 200
 
 @app.route("/movie", methods=["POST"])
 def postMovie():
@@ -43,6 +47,10 @@ def postMovie():
   openface.copyToDocker(currentPath + "/api/data/input.mp4")
   return jsonify({"message": "Success uploaded."}), 200
 
+@app.after_request
+def afterRequest(res):
+  res.headers['Access-Control-Allow-Headers'] = '*'
+  return res
 
 # 終了時に必ず実行
 @atexit.register
