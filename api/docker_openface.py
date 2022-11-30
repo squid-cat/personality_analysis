@@ -45,6 +45,7 @@ class Openface:
     """
     self.container_openface = self.createContainer()
     self.container_openface.start()
+    print("コンテナを起動しました (container_id: {})".format(self.container_openface.short_id))
     return 
 
 
@@ -55,6 +56,7 @@ class Openface:
     """
     self.container_openface.stop()
     self.container_openface.remove()
+    print("コンテナを終了・削除しました (container_id: {})".format(self.container_openface.short_id))
     return
 
   def copyToDocker(self, src: str) -> None:
