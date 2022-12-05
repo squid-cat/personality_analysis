@@ -2,6 +2,7 @@
 import docker
 import os
 import tarfile
+import threading
 
 # 型定義
 # Image: https://docker-py.readthedocs.io/en/stable/images.html#image-objects
@@ -21,6 +22,9 @@ class Openface:
 
     # 定数の定義
     self.image_name = "algebr/openface:latest" # openfaceのimage名（最新バージョンを指定） https://hub.docker.com/r/algebr/openface/
+    self.threadAnalysis = threading.Thread(target=self.__exeThreadAnalysis)
+    self.isAnalysis = False # 解析中のステータス保持
+    self.isResult = False # 解析後の結果保持
 
     # dockerのclient情報を取得
     try:
@@ -73,6 +77,7 @@ class Openface:
       finally:
         tar.close()
 
+    # ファイルをアップロード
     with open('copy.tar', 'rb') as fd:
       ok = self.container_openface.put_archive(path="/home/openface-build", data=fd)
       if not ok:
@@ -80,8 +85,32 @@ class Openface:
       else:
         print("{} -> {}:/home/openface-build にコピーしました".format(src, self.container_openface.short_id))
     
+    # tarファイルを削除
+    os.remove("copy.tar")
+
     return
 
+  def getResultFile(self, src: str) -> None:
+    """
+    解析結果のcsvファイルを取得する
+    """
+    f = open(src + "/result.csv", 'wb')
+    bits, stat = self.container_openface.get_archive('/home/openface-build/processed/input.csv')
+    print(stat)
+    for chunk in bits:
+      f.write(chunk)
+    f.close()
+    return
+
+
+  def exeAnalysis(self):
+    """
+    openfaceの実行
+    """
+    if not self.isAnalysis:
+      self.threadAnalysis.start()
+
+    return
 
   def createContainer(self) -> Container:
     """
@@ -115,4 +144,18 @@ class Openface:
     print("imageの新規作成中... (target: {})".format(image_name))
     self.client.containers.run(image=image_name, remove=True)
     print("imageの作成終了 (target: {})".format(image_name))
+    return
+
+  def __exeThreadAnalysis(self):
+    """
+    self.threadAnalysis に登録する動作
+    openfaceを非同期に走らせる
+    """
+    self.isAnalysis = True
+    try:
+      self.container_openface.exec_run(cmd="build/bin/FaceLandmarkVidMulti -f input.mp4")
+    finally:
+      self.isAnalysis = False
+      self.isResult = True
+    
     return

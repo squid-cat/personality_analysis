@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 # 独自ライブラリのimport
 import docker_openface
+import AU_analysis
 
 app = Flask(__name__)
 CORS(app)
@@ -21,7 +22,8 @@ openface.start()
 def getTest():
   return jsonify({"message": "ok",
                   "data": {"connect": True}}), 200
-
+  
+# [POST] 動画をアップロードする
 @app.route("/movie", methods=["POST"])
 def postMovie():
 
@@ -45,7 +47,25 @@ def postMovie():
   upload_file.save(currentPath + "/api/data/input.mp4")
   # dockerに転送
   openface.copyToDocker(currentPath + "/api/data/input.mp4")
+  # 解析を実行
+  openface.exeAnalysis()
   return jsonify({"message": "Success uploaded."}), 200
+
+# [GET] 進捗確認をする
+@app.route("/analysis/progress", methods=["GET"])
+def getAnalysisProgress():
+  return jsonify({"message": "ok",
+                  "data": {"is_analysis": openface.isAnalysis, "is_result": openface.isResult}}), 200
+
+# [GET] 判定結果を返却する
+@app.route("/analysis/result", methods=["GET"])
+def getAnalysisResult():
+  # ファイルを取得する
+  openface.getResultFile(currentPath + "/api/data")
+
+  # AUの分析を行う
+
+  return jsonify({"message": "ok"}), 200
 
 @app.after_request
 def afterRequest(res):
