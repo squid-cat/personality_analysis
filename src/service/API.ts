@@ -1,4 +1,9 @@
-import { IAnalysisProgress, IConnect, IPostResult } from "@/types";
+import {
+  IAnalysisProgress,
+  IAnalysisResult,
+  IConnect,
+  IPostResult,
+} from "@/types";
 import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -51,8 +56,21 @@ const getAnalysisProgress = () => {
   return res;
 };
 
+// [GET] 分析結果を取得する
+const getAnalysisResult = () => {
+  const res = axiosInstance
+    .get<IAnalysisResult>("/analysis/result")
+    .then((res) => res.data)
+    .catch((e) => {
+      console.error(e);
+      return null;
+    });
+  return res;
+};
+
 export const API = {
   getConnect,
   postMovie,
   getAnalysisProgress,
+  getAnalysisResult,
 };
