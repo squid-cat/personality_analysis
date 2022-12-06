@@ -24,16 +24,6 @@ const getConnect = () => {
   return res;
 };
 
-const fetchConnect = () => {
-  const res = fetch(BASE_URL + "/connect", {
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
-  }).then((r) => r.json());
-  return res;
-};
-
 export const API = {
   getConnect,
-  fetchConnect,
 };
