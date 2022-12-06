@@ -96,7 +96,6 @@ class Openface:
     """
     f = open(src + "/result.csv", 'wb')
     bits, stat = self.container_openface.get_archive('/home/openface-build/processed/input.csv')
-    print(stat)
     for chunk in bits:
       f.write(chunk)
     f.close()
