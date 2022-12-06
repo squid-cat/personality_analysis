@@ -55,7 +55,7 @@ def postMovie():
 @app.route("/analysis/progress", methods=["GET"])
 def getAnalysisProgress():
   return jsonify({"message": "ok",
-                  "data": {"is_analysis": openface.isAnalysis, "is_result": openface.isResult}}), 200
+                  "data": {"isAnalysis": openface.isAnalysis, "isResult": openface.isResult}}), 200
 
 # [GET] 判定結果を返却する
 @app.route("/analysis/result", methods=["GET"])
@@ -64,8 +64,8 @@ def getAnalysisResult():
   openface.getResultFile(currentPath + "/api/data")
 
   # AUの分析を行う
-
-  return jsonify({"message": "ok"}), 200
+  data = AU_analysis.getAUdataFromCsv(currentPath + "/api/data/result.csv")
+  return jsonify({"message": "ok", "data": data}), 200
 
 @app.after_request
 def afterRequest(res):
