@@ -3,3 +3,5 @@ type APIresult = {
 };
 
 export type IConnect = APIresult & { data?: { connect: boolean } };
+
+export type IPostResult = APIresult;

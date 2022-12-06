@@ -1,4 +1,4 @@
-import { IConnect } from "@/types";
+import { IConnect, IPostResult } from "@/types";
 import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -24,6 +24,22 @@ const getConnect = () => {
   return res;
 };
 
+// [POST] 解析する動画をpost
+const postMovie = (file: File) => {
+  const params = new FormData();
+  params.append("file", file);
+  const res = axiosInstance
+    .post<IPostResult>("/movie", params, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .catch((e) => {
+      console.error(e);
+      return null;
+    });
+  return res;
+};
+
 export const API = {
   getConnect,
+  postMovie,
 };
